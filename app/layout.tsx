@@ -1,10 +1,11 @@
-
+import { ConvexProvider,ConvexReactClient } from "convex/react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import Provider from "./provider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,21 +27,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+ 
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-       <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
-       <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
+        <Provider>
+          <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
           </ThemeProvider>
-       </GoogleOAuthProvider>
+        </Provider>
       </body>
     </html>
   );
