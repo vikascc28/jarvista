@@ -6,6 +6,7 @@ import { GetAuthUserData } from '@/services/GlobalApi';
 import { useConvex } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { AuthContext } from '@/context/AuthContext';
+import { AssistantContext } from '@/context/AssistantContext';
 
 
 function Provider({
@@ -16,6 +17,7 @@ function Provider({
     const convex= useConvex()
     const router=useRouter()
     const {user,setUser}=useContext(AuthContext)
+    const[assistant,setAssistant]=useState();
     useEffect(()=>{
       CheckUserAuth();
     },[])
@@ -40,8 +42,10 @@ function Provider({
     }
   return (
     <div>
-      <Header /> 
+      <AssistantContext.Provider value={{assistant,setAssistant}}>
+        <Header /> 
         {children}
+        </AssistantContext.Provider> 
     </div>
   )
 }
