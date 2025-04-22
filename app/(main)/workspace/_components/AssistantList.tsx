@@ -16,7 +16,7 @@ function AssistantList() {
    const {assistant,setAssistant}=useContext(AssistantContext)
   useEffect(()=>{
     user && GetUserAssistants()
-  },[user])
+  },[user && assistant==null])
   
     const GetUserAssistants=async ()=>{
         const result = await convex.query(api.userAiAssistants.GetAllUserAssistants,{

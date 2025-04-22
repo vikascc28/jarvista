@@ -11,6 +11,7 @@ export const InsertSelectedAssistants=mutation({
             args.records.map(async(record:any)=>
             await ctx.db.insert('userAiAssistants',{
                 ...record,
+                aiModelId:'OpenAI: GPT-3.5 Turbo',
                 uid:args.uid
             })
             )
@@ -29,5 +30,28 @@ export const GetAllUserAssistants = query({
        .collect();
 
        return result;
+    }
+})
+
+export const UpdateUserAiAssistant =mutation({
+    args:{
+        id:v.id('userAiAssistants'),
+        userInstruction:v.string(),
+        aiModelId:v.string()
+    },
+    handler:async(ctx, args)=>{
+        const result =await ctx.db.patch(args.id,{
+            aiModelId:args.aiModelId,
+            userInstruction: args.userInstruction
+        })
+        return result;
+    }
+})
+export const DeleteAssistant = mutation({
+    args:{
+        id:v.id('userAiAssistants')
+    },
+    handler:async (ctx , args)=>{
+        await ctx.db.delete(args.id);
     }
 })
