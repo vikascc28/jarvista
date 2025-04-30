@@ -43,8 +43,8 @@ const googleLogin = useGoogleLogin({
       gap-5 border rounded-2xl p-10 shadow-md'>
         <Image src= {'/logo.svg'}
         alt="Logo" width={100} height={200} />
-        <h2 className='text-2xl'>Sign In to AI Personal assistent</h2>
-        <Button onClick={()=>googleLogin()}>Sign In with Gmail</Button>
+        <h2 className='text-2xl'>Sign In to AI Personal Assistant</h2>
+        <Button onClick={()=>googleLogin()}>Sign-in with Gmail</Button>
       </div>
     </div>
 
