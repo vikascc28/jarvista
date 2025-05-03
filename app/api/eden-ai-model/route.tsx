@@ -1,8 +1,8 @@
-import {NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
 
-    const {provider, userInput} = await req.json()
+    const { provider, userInput, aiResp } = await req.json()
 
     const headers = {
         Authorization: "Bearer " + process.env.EDEN_AI_API_KEY,
@@ -23,6 +23,17 @@ export async function POST(req: NextRequest) {
                     },
                 ],
             },
+            aiResp && {
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "text",
+                        "content": {
+                            "text": aiResp
+                        },
+                    },
+                ],
+            },
         ]
     });
 
@@ -35,9 +46,9 @@ export async function POST(req: NextRequest) {
     const result = await response.json();
     console.log(result);
     const resp = {
-            role: 'assistant',
-            content: result[provider].generated_text,
-        }
+        role: 'assistant',
+        content: result[provider].generated_text,
+    }
 
-return NextResponse.json(resp);
+    return NextResponse.json(resp);
 }
