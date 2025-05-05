@@ -19,7 +19,8 @@ import React, { useContext, useEffect, useState } from 'react'
     image: string,
     instruction:string,
     userInstruction: string,
-    sampleQuestions: string[]
+    sampleQuestions: string[],
+    aiModelId?:string
 
 }
 function AIAssistants() {
