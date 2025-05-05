@@ -8,6 +8,7 @@ import { api } from '@/convex/_generated/api'
 import { ASSISTANT } from '../../ai-assistants/page'
 import Image from 'next/image'
 import { AssistantContext } from '@/context/AssistantContext'
+import AddNewAssistant from './AddNewAssistant'
 
 function AssistantList() {
     const { user } = useContext(AuthContext)
@@ -36,7 +37,10 @@ function AssistantList() {
     return (
         <div className='p-5 bg-secondary border-r-[1px] h-screen overflow-y-auto relative'>
             <h2>Your personal AI Assistant</h2>
-            <Button className='w-full mt-3'>+ Add New Assistant</Button>
+             <AddNewAssistant>
+                 <Button className='w-full mt-3'>Add New Assistant</Button>
+             </AddNewAssistant>
+
             <Input className='bg-white mt-3' placeholder='search' />
             <div className='mt-5'>
                 {assistantList.map((assistant_, index) => (

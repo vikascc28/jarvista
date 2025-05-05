@@ -7,6 +7,7 @@ import { Loader2Icon, Send } from 'lucide-react';
 import AiModelOptions from "@/services/AiModelOptions";
 import axios from "axios";
 import { AssistantContext } from "@/context/AssistantContext";
+import Image from 'next/image';
 
 type MESSAGE = {
     role: string,
