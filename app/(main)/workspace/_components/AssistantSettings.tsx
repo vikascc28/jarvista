@@ -67,8 +67,8 @@ function AssistantSettings() {
             </div>
             <div>
                 <div className='mt-4'>
-                    <h2>Model:</h2>
-                    <Select defaultValue='assistant?.aiModel.id'
+                    <h2 >Model:</h2>
+                    <Select defaultValue={assistant.aiModelId}
                             onValueChange={(value) => onHandleInputChange('aiModelId', value)}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Select Model"/>
