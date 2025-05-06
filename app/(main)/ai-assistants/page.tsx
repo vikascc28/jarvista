@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation'
 import React, { useContext, useEffect, useState } from 'react'
 
   export type ASSISTANT={
+    [x: string]: number
     id: number,
     name: string,
     title: string ,
