@@ -9,43 +9,57 @@ import { ASSISTANT } from '../../ai-assistants/page'
 import Image from 'next/image'
 import { AssistantContext } from '@/context/AssistantContext'
 import AddNewAssistant from './AddNewAssistant'
+import Profile from './Profile'
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { LogOut, UserCircle2 } from 'lucide-react'
 
 function AssistantList() {
     const { user } = useContext(AuthContext)
     const convex = useConvex()
     const [assistantList, setAssistantList] = useState<ASSISTANT[]>([])
     const { assistant, setAssistant } = useContext(AssistantContext)
+    const [openProfile, setOpenProfile] = useState(false)
 
     const GetUserAssistants = async () => {
-        try {
-            const result = await convex.query(api.userAiAssistants.GetAllUserAssistants, {
-                uid: user?._id
-            })
-            console.log(result)
-            setAssistantList(result)
-        } catch (error) {
-            console.log("Error fetching assistants", error)
-        }
+        // try {
+        //     const result = await convex.query(api.userAiAssistants.GetAllUserAssistants, {
+        //         uid: user?._id
+        //     })
+        //     console.log(result)
+        //     setAssistantList(result)
+        // } catch (error) {
+        //     console.log("Error fetching assistants", error)
+        // }
     }
 
     useEffect(() => {
-        if (user && assistant == null) {
+        if (user) {
             GetUserAssistants()
         }
-    }, [user, assistant])
+    }, [user])
 
     return (
         <div className='p-5 bg-secondary border-r-[1px] h-screen overflow-y-auto relative'>
             <h2>Your personal AI Assistant</h2>
-             <AddNewAssistant>
-                 <Button className='w-full mt-3'>Add New Assistant</Button>
-             </AddNewAssistant>
+
+            <AddNewAssistant>
+                <Button className='w-full mt-3'>Add New Assistant</Button>
+            </AddNewAssistant>
 
             <Input className='bg-white mt-3' placeholder='search' />
+
             <div className='mt-5'>
                 {assistantList.map((assistant_, index) => (
                     <div
-                        key={index}
+                        key={`${assistant_.id}-${index}`} // ✅ Ensures unique key
                         className={`p-2 flex gap-3 items-center hover:bg-gray-200 rounded-xl 
                             cursor-pointer hover:dark:bg-slate-700 mt-2
                             ${assistant_.id === assistant?.id ? 'bg-gray-200' : ''}`}
@@ -65,21 +79,34 @@ function AssistantList() {
                     </div>
                 ))}
             </div>
-            <div
-                className='absolute bottom-10 flex gap-3 items-center
-                hover:bg-gray-200 w-[87%] p-2 rounded-xl cursor-pointer'>
-                <Image
-                    alt="User Avatar"
-                    width={35}
-                    height={35}
-                    className='rounded-full'
-                    src={user?.image || '/default-avatar.png'}
-                />
-                <div>
-                    <h2 className='font-bold'>{user?.name}</h2>
-                    <h2 className='text-gray-400 text-sm'>{user?.orderId ? 'Pro Plan' : 'Free Plan'}</h2>
-                </div>
-            </div>
+
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <div className='absolute bottom-10 flex gap-3 items-center hover:bg-gray-200 w-[87%] p-2 rounded-xl cursor-pointer'>
+                        <Image
+                            alt="User Avatar"
+                            width={35}
+                            height={35}
+                            className='rounded-full'
+                            src={user?.picture || '/default-avatar.avif'}
+                        />
+                        <div>
+                            <h2 className='font-bold'>{user?.name}</h2>
+                            <h2 className='text-gray-400 text-sm'>{user?.orderId ? 'Pro Plan' : 'Free Plan'}</h2>
+                        </div>
+                    </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className='w-[200px]'>
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setOpenProfile(true)}>
+                        <UserCircle2 /> Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem><LogOut /> Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Profile openDialog={openProfile} setOpenDialog={setOpenProfile} />
         </div>
     )
 }
