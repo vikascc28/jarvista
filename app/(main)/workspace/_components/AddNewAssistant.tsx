@@ -39,6 +39,7 @@ const DEFAULT_ASSISTANT = {
   sampleQuestions: [],
   userInstruction: "",
   aiModelId: "",
+  userInteraction: "",
 };
 
 function AddNewAssistant({ children }: any) {
@@ -197,7 +198,7 @@ function AddNewAssistant({ children }: any) {
                 <div className="flex gap-5 justify-end mt-10">
 
                   <DialogClose>
-                  <Button variant={"secondary"}>Cancel</Button>
+                    <Button variant={"secondary"}>Cancel</Button>
                   </DialogClose>
                   <Button disabled={loading} onClick={onSave}>
                     {loading && <Loader2Icon className="animate-spin" />}Add

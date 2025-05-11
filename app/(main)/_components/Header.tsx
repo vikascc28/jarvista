@@ -4,18 +4,13 @@ import Image from 'next/image'
 import React, { useContext } from 'react'
 
 function Header() {
-    const {user }=useContext(AuthContext)
-    return (
-    <div className='p-3 shadow-sm flex justify-between items-center px-14 fixed'>
-        <Image src={'/logo.svg'} alt='logo'
-        width={40}
-        height={40}
-        />
-       { user?.picture && <Image src={user?.picture } alt='user-image'
-        width={40}
-        height={40}
-        className='rounded-full'
-        />}
+  const { user } = useContext(AuthContext)
+  return (
+    <div className='p-3 flex justify-between items-center px-14 fixed'>
+      <Image src={'/projectLogo.jpeg'} alt='logo'
+        width={100}
+        height={100}
+      />
     </div>
   )
 }
