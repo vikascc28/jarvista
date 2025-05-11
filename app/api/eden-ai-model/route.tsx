@@ -1,54 +1,45 @@
-import { NextRequest, NextResponse } from "next/server";
+// import { NextRequest, NextResponse } from "next/server";
+// import { OpenAI } from "openai";
 
-export async function POST(req: NextRequest) {
+// const baseURL = "https://api.aimlapi.com/v1";
 
-    const { provider, userInput, aiResp } = await req.json()
+// export async function POST(req: NextRequest) {
+//   const { userInput, aiResp } = await req.json();
 
-    const headers = {
-        Authorization: "Bearer " + process.env.EDEN_AI_API_KEY,
-        'Content-Type': "application/json",
-    };
-    const url = "https://api.edenai.run/v2/multimodal/chat";
-    const body = JSON.stringify({
-        providers: ["provider"],
-        messages: [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "content": {
-                            "text": userInput
-                        },
-                    },
-                ],
-            },
-            aiResp && {
-                "role": "assistant",
-                "content": [
-                    {
-                        "type": "text",
-                        "content": {
-                            "text": aiResp
-                        },
-                    },
-                ],
-            },
-        ]
-    });
+//   const api = new OpenAI({
+//     apiKey: process.env.AIML_API_KEY,
+//     baseURL,
+//   });
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body,
-    });
+//   const messages = [
+//     {
+//       role: "system",
+//       content: "You are a helpful assistant.",
+//     },
+//     {
+//       role: "user",
+//       content: userInput,
+//     },
+//   ];
 
-    const result = await response.json();
-    console.log(result);
-    const resp = {
-        role: 'assistant',
-        content: result[provider].generated_text,
-    }
+//   if (aiResp) {
+//     messages.push({
+//       role: "assistant",
+//       content: aiResp,
+//     });
+//   }
 
-    return NextResponse.json(resp);
-}
+//   const completion = await api.chat.completions.create({
+//     model: "mistralai/Mistral-7B-Instruct-v0.2",
+//     messages,
+//     temperature: 0.7,
+//     max_tokens: 1000,
+//   });
+
+//   const responseText = completion.choices[0].message.content;
+
+//   return NextResponse.json({
+//     role: "assistant",
+//     content: responseText,
+//   });
+// }
