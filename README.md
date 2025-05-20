@@ -36,7 +36,6 @@ To set up JarVista locally, you would typically follow these steps:
     git clone github.com/vikascc28/jarvista
     cd jarvista
     ```
-    *(Replace `github.com/vikascc28/jarvista` with the actual GitHub repository URL)*
 
 2.  **Install dependencies:**
     ```bash
