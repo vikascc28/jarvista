@@ -9,10 +9,11 @@ import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 function SignIn() {
   const CreateUser = useMutation(api.users.CreateUser);
-  const { use, setUser } = useContext(AuthContext);
+  const { setUser } = useContext(AuthContext);
   const router = useRouter();
 
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
@@ -27,19 +28,25 @@ function SignIn() {
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      if (typeof window !== undefined) {
-        localStorage.setItem('user_token', tokenResponse.access_token);
+      try {
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: tokenResponse.access_token }),
+        });
+        const user = await GetAuthUserData(tokenResponse.access_token);
+        const result = await CreateUser({
+          name: user?.name,
+          email: user?.email,
+          picture: user?.picture,
+        });
+        setUser(result);
+        router.replace('/ai-assistants');
+      } catch {
+        toast.error('Unable to sign in. Please try again.');
       }
-      const user = await GetAuthUserData(tokenResponse.access_token);
-      const result = await CreateUser({
-        name: user?.name,
-        email: user?.email,
-        picture: user?.picture,
-      });
-      setUser(result);
-      router.replace('/ai-assistants');
     },
-    onError: (errorResponse) => console.log(errorResponse),
+    onError: () => toast.error('Google sign-in failed.'),
   });
 
   return (
@@ -77,7 +84,7 @@ function SignIn() {
           Sign in to Jarvista
         </h2>
         <p className="text-sm text-zinc-400 text-center">
-        Get Ready to  Enter the Infinite Intelligence Horizon.
+          Enter the infinite intelligence horizon.
         </p>
         <Button
           onClick={() => googleLogin()}

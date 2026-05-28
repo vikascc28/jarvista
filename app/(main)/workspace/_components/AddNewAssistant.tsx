@@ -30,7 +30,8 @@ import { api } from "@/convex/_generated/api";
 import { AuthContext } from "@/context/AuthContext";
 import { AssistantContext } from "@/context/AssistantContext";
 import { Loader2Icon } from "lucide-react";
-const DEFAULT_ASSISTANT = {
+import { AssistantType } from "@/context/AssistantContext";
+const DEFAULT_ASSISTANT: AssistantType = {
   image: "/bug-fixer.avif",
   name: "",
   title: "",
@@ -38,11 +39,10 @@ const DEFAULT_ASSISTANT = {
   id: 0,
   sampleQuestions: [],
   userInstruction: "",
-  aiModelId: "",
-  userInteraction: "",
+  aiModelId: "gemini-1.5-flash",
 };
 
-function AddNewAssistant({ children }: any) {
+function AddNewAssistant({ children }: { children: React.ReactNode }) {
   const [selectedAssistant, setSelectedAssistant] =
     useState<ASSISTANT>(DEFAULT_ASSISTANT);
 
@@ -53,8 +53,8 @@ function AddNewAssistant({ children }: any) {
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const { assistant, setAssistant } = useContext(AssistantContext);
-  const onHandleInputChange = (field: string, value: string) => {
-    setSelectedAssistant((prev: any) => ({
+  const onHandleInputChange = (field: keyof AssistantType, value: string) => {
+    setSelectedAssistant((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -101,7 +101,7 @@ function AddNewAssistant({ children }: any) {
                     <div
                       className=" p-1 hover:bg-secondary flex gap-2 items-center rounded-xl cursor-pointer"
                       key={index}
-                      onClick={() => setSelectedAssistant(assistant)}
+                      onClick={() => setSelectedAssistant({ ...assistant, aiModelId: assistant.aiModelId ?? "gemini-1.5-flash" })}
                     >
                       <Image
                         src={assistant.image}
@@ -155,7 +155,7 @@ function AddNewAssistant({ children }: any) {
                 <div className="mt-4">
                   <h2>Model:</h2>
                   <Select
-                    defaultValue={selectedAssistant?.aiModelId}
+                    value={selectedAssistant?.aiModelId}
                     onValueChange={(value) =>
                       onHandleInputChange("aiModelId", value)
                     }
@@ -165,7 +165,7 @@ function AddNewAssistant({ children }: any) {
                     </SelectTrigger>
                     <SelectContent>
                       {AiModelOptions.map((model, index) => (
-                        <SelectItem value={model.name}>
+                        <SelectItem key={model.id} value={model.aiModelId}>
                           <div
                             key={index}
                             className="flex gap-2 items-center m-1"

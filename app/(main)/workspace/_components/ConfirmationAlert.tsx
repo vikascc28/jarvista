@@ -11,7 +11,13 @@ import {
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
   
-function ConfirmationAlert({children,onDelete}:any) {
+function ConfirmationAlert({
+  children,
+  onDelete,
+}: {
+  children: React.ReactNode;
+  onDelete: () => void | Promise<void>;
+}) {
   return (
     <AlertDialog>
     <AlertDialogTrigger>{children}</AlertDialogTrigger>

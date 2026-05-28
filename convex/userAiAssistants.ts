@@ -1,21 +1,39 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+const assistantRecordValidator = v.object({
+    id: v.number(),
+    name: v.string(),
+    title: v.string(),
+    image: v.string(),
+    instruction: v.string(),
+    userInstruction: v.string(),
+    sampleQuestions: v.array(v.string()),
+    aiModelId: v.optional(v.string()),
+});
+
 export const InsertSelectedAssistants=mutation({
     args:{
-        records:v.any(),
+        records:v.array(assistantRecordValidator),
         uid:v.id('users')
     },
     handler:async(ctx , args)=>{
-        const insertedIds =await Promise.all(
-            args.records.map(async(record:any)=>
-            await ctx.db.insert('userAiAssistants',{
+        const insertedIds = [];
+        for (const record of args.records) {
+            const existing = await ctx.db
+                .query("userAiAssistants")
+                .withIndex("by_uid_assistantId", (q) => q.eq("uid", args.uid).eq("id", record.id))
+                .first();
+
+            if (existing) continue;
+
+            const insertedId = await ctx.db.insert('userAiAssistants',{
                 ...record,
-                aiModelId:'OpenAI: GPT-3.5 Turbo',
+                aiModelId: record.aiModelId ?? 'gemini-1.5-flash',
                 uid:args.uid
-            })
-            )
-        )
+            });
+            insertedIds.push(insertedId);
+        }
         return insertedIds;
     }
 });
@@ -26,8 +44,7 @@ export const GetAllUserAssistants = query({
     },
     handler: async (ctx, args) => {
        const result = await ctx.db.query('userAiAssistants')
-       .filter(q =>q.eq(q.field('uid'),args.uid))
-      
+       .withIndex("by_uid", (q) => q.eq("uid", args.uid))
        .collect();
 
        return result;

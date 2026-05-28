@@ -27,7 +27,7 @@ JarVista leverages a robust stack of modern web development technologies:
 * **Backend:** [Convex](https://docs.convex.dev) (Realtime backend as a service)
 * **AI Integration:** [Eden AI API](https://www.edenai.co/docs) (For various AI functionalities)
 
-## Installation and Setup (Conceptual)
+## Installation and Setup
 
 To set up JarVista locally, you would typically follow these steps:
 
@@ -45,12 +45,17 @@ To set up JarVista locally, you would typically follow these steps:
     ```
 
 3.  **Configure Environment Variables:**
-    Create a `.env` file in the root directory and add your API keys and configuration details for services like Google Identity Platform, Convex, and Eden AI.
-    ```
-    # Example .env content (actual variables may vary)
-    NEXT_PUBLIC_CONVEX_URL=your_convex_url
-    NEXT_PUBLIC_EDEN_AI_API_KEY=your_eden_ai_api_key
-    # Add other necessary environment variables for Google Identity Platform etc.
+    Create a `.env.local` file in the project root:
+    ```bash
+    NEXT_PUBLIC_CONVEX_URL=
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID=
+    GOOGLE_API_KEY=
+    OPENAI_API_KEY=
+    RAZORPAY_LIVE_KEY=
+    RAZORPAY_SECRET_KEY=
+    NEXT_PUBLIC_RAZORPAY_KEY_ID=
+    RAZORPAY_PLAN_ID=
+    RAZORPAY_WEBHOOK_SECRET=
     ```
 
 4.  **Run the development server:**
@@ -65,6 +70,28 @@ To set up JarVista locally, you would typically follow these steps:
 ## Usage
 
 Once the application is running, you can access it via your web browser. Users will likely need to sign in using their Google account to access personalized AI assistant features. The interface will guide users through various functionalities, leveraging the integrated AI capabilities.
+
+## Architecture (Current)
+
+- **Frontend:** Next.js App Router + React + shadcn/ui.
+- **Auth:** Google OAuth with server-side session cookie (`/api/auth/session`).
+- **Data layer:** Convex tables for users, assistants, and conversation memory.
+- **AI gateway:** `/api/gemini-model` with model routing, prompt guardrails, and streamed NDJSON responses.
+- **Billing:** Razorpay subscription create/cancel + signature verification + webhook endpoint.
+
+## Quality checks
+
+```bash
+npm run lint
+npm run test
+npm run build
+```
+
+## Known limitations
+
+- Webhook credit sync requires valid Razorpay webhook and Convex deployment config.
+- Streaming is generated from server chunking and depends on upstream model response time.
+- E2E tests require a running app and configured auth/environment variables.
 
 ## Future Enhancements
 

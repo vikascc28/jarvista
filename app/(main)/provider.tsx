@@ -2,11 +2,11 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'; 
 import Header from './_components/Header';
-import { GetAuthUserData } from '@/services/GlobalApi';
+import { GetSessionUserData } from '@/services/GlobalApi';
 import { useConvex } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { AuthContext } from '@/context/AuthContext';
-import { AssistantContext } from '@/context/AssistantContext';
+import { AssistantContext, AssistantType } from '@/context/AssistantContext';
 
 
 function Provider({
@@ -16,28 +16,29 @@ function Provider({
   }>) {
     const convex= useConvex()
     const router=useRouter()
-    const {user,setUser}=useContext(AuthContext)
-    const[assistant,setAssistant]=useState();
+    const { setUser }=useContext(AuthContext)
+    const[assistant,setAssistant]=useState<AssistantType | null>(null);
     useEffect(()=>{
-      CheckUserAuth();
+      void CheckUserAuth();
     },[])
     const CheckUserAuth =async ()=>{
-      const token= localStorage.getItem('user_token')
-      //Get new Access Token
-      const user =token && await GetAuthUserData(token);
-      if(!user?.email){
+      const oauthUser = await GetSessionUserData();
+      if(!oauthUser?.email){
         router.replace('/sign-in')
         return
       }
       //get user from db
       try{
         const result = await convex.query(api.users.GetUser, { 
-          email:user?.email
+          email:oauthUser?.email
          });
-         console.log(result);
+         if (!result) {
+          router.replace('/sign-in');
+          return;
+         }
          setUser(result);
-      }catch (e){
-        console.error("Failed to fetch user from Convex:", e);
+      }catch {
+        router.replace('/sign-in');
       }
     }
   return (

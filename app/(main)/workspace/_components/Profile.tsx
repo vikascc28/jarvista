@@ -17,6 +17,7 @@ import axios from "axios";
 import { api } from "@/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
+import { PLAN_LIMITS } from "@/lib/constants";
 
 function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDialog: (open: boolean) => void }) {
     const { user } = useContext(AuthContext);
@@ -25,18 +26,13 @@ function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDi
     const updateUserOrder = useMutation(api.users.updateTokens);
 
     useEffect(() => {
-        if (user?.orderId) {
-            setMaxToken(500000)
-        } else {
-            setMaxToken(10000)
-        }
-    }), [user]
+        setMaxToken(user?.orderId ? PLAN_LIMITS.proCredits : PLAN_LIMITS.freeCredits)
+    }, [user])
 
     useEffect(() => {
         const script = document.createElement("script");
         script.src = "https://checkout.razorpay.com/v1/checkout.js";
         script.async = true;
-        script.onload = () => console.log(true);
         document.body.appendChild(script);
         return () => {
             document.body.removeChild(script);
@@ -44,11 +40,18 @@ function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDi
     }, []);
 
     const GenerateSubscriptionId = async () => {
-        setLoading(true);
-        const result = await axios.post('/api/create-subscription');
-        console.log(result.data);
-        MakePayment(result?.data?.id);
-        setLoading(false);
+        try {
+            setLoading(true);
+            const result = await axios.post('/api/create-subscription', {
+                uid: user?._id,
+                email: user?.email,
+            });
+            MakePayment(result?.data?.id);
+        } catch {
+            toast.error('Failed to initialize subscription');
+        } finally {
+            setLoading(false);
+        }
     }
 
     const MakePayment = (subscriptionId: string) => {
@@ -59,13 +62,17 @@ function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDi
             description: "Pro Subscription Plan",
             image: '/logo.svg',
             handler: async function (resp: any) {
-                console.log(resp.razorpay_payment_id);
-                console.log(resp);
                 if (resp?.razorpay_payment_id) {
+                    const verification = await axios.post('/api/verify-subscription', resp);
+                    if (!verification?.data?.verified) {
+                        toast.error('Payment signature verification failed.');
+                        return;
+                    }
+
                     await updateUserOrder({
-                        uid: user?._id,
+                        uid: user?._id!,
                         orderId: resp.razorpay_subscription_id,
-                        credits: user.credits + 500000,
+                        credits: PLAN_LIMITS.proCredits,
                     });
                     toast('Thank You! Credits Added')
                 }
@@ -89,12 +96,20 @@ function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDi
     }
 
     const cancelSubscription = async () => {
-        const result = await axios.post('/api/cancel-subscription', {
-            subId: user?.orderId
-        });
-        console.log(result);
-        toast('Subscription Cancelled');
-        window.location.reload();
+        try {
+            await axios.post('/api/cancel-subscription', {
+                subId: user?.orderId
+            });
+            await updateUserOrder({
+                uid: user?._id!,
+                credits: PLAN_LIMITS.freeCredits,
+                orderId: undefined,
+            });
+            toast('Subscription cancelled');
+            window.location.reload();
+        } catch {
+            toast.error('Unable to cancel subscription');
+        }
     }
 
     return (
@@ -130,13 +145,13 @@ function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDi
                                             <h2 className="font-bold text-lg">Pro Plan</h2>
                                             <h2>500,000 Tokens</h2>
                                         </div>
-                                        <h2 className="font-bold text-lg">$ 10/month</h2>
+                                        <h2 className="font-bold text-lg">$ {PLAN_LIMITS.monthlyPriceUsd}/month</h2>
                                     </div>
                                     <hr className="my-3" />
-                                    <Button className="w-full" disabled={loading} onClick={GenerateSubscriptionId}> {loading ? <Loader2Icon className="animate-spin" /> : <WalletCardsIcon />}Upgrade 10$</Button>
+                                    <Button className="w-full" disabled={loading} onClick={GenerateSubscriptionId}> {loading ? <Loader2Icon className="animate-spin" /> : <WalletCardsIcon />}Upgrade ${PLAN_LIMITS.monthlyPriceUsd}</Button>
                                 </div>
                                 :
-                                <Button className="mt-5 w-full" variant="secondary">Cancel Subscription</Button>
+                                <Button className="mt-5 w-full" variant="secondary" onClick={cancelSubscription}>Cancel Subscription</Button>
                             }
                         </div>
                     </DialogDescription>

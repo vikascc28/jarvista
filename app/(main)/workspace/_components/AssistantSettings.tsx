@@ -114,6 +114,7 @@
 
 'use client'
 import { AssistantContext } from '@/context/AssistantContext'
+import { AssistantType } from '@/context/AssistantContext'
 import Image from 'next/image'
 import React, { useContext, useState } from 'react'
 import {
@@ -139,10 +140,13 @@ function AssistantSettings() {
     const [loading, setLoading] = useState(false)
 
     const onHandleInputChange = (field: string, value: string) => {
-        setAssistant((prev: any) => ({
-            ...prev,
-            [field]: value
-        }))
+        setAssistant((prev) => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                [field]: value
+            } as AssistantType;
+        })
     }
 
     const onSave = async () => {
