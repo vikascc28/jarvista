@@ -19,11 +19,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { LogOut, UserCircle2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 function AssistantList() {
     const { user, logout } = useContext(AuthContext);
     const { assistant, setAssistant } = useContext(AssistantContext);
     const [openProfile, setOpenProfile] = useState(false);
+    const router = useRouter();
 
     const assistantList = useQuery(
         api.userAiAssistants.GetAllUserAssistants,
@@ -99,7 +101,10 @@ function AssistantList() {
                     <DropdownMenuItem onClick={() => setOpenProfile(true)} className="cursor-pointer">
                         <UserCircle2 className="mr-2 h-4 w-4" /> Profile
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 dark:text-red-400">
+                    <DropdownMenuItem onClick={async () => {
+                        await logout();
+                        router.replace('/sign-in');
+                    }} className="cursor-pointer text-red-600 dark:text-red-400">
                         <LogOut className="mr-2 h-4 w-4" /> Logout
                     </DropdownMenuItem>
                 </DropdownMenuContent>

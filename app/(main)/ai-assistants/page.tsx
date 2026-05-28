@@ -31,12 +31,16 @@ function AIAssistants() {
   const router = useRouter();
 
   useEffect(() => {
-    user && GetUserAssistants()
+    if (user) {
+      void GetUserAssistants();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const GetUserAssistants = async () => {
+    if (!user?._id) return;
     const result = await convex.query(api.userAiAssistants.GetAllUserAssistants, {
-      uid: user?._id
+      uid: user._id
     })
     if (result.length > 0) {
       router.replace('/workspace')
@@ -58,10 +62,11 @@ function AIAssistants() {
   }
 
   const onClickContinue = async () => {
+    if (!user?._id) return;
     setLoading(true);
     await insertAssistant({
       records: selectedAssistant,
-      uid: user?._id
+      uid: user._id
     })
     setLoading(false)
     router.push('/workspace')

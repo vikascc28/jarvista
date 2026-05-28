@@ -114,6 +114,7 @@
 
 'use client'
 import { AssistantContext } from '@/context/AssistantContext'
+import { AssistantType } from '@/context/AssistantContext'
 import Image from 'next/image'
 import React, { useContext, useState } from 'react'
 import {
@@ -139,30 +140,33 @@ function AssistantSettings() {
     const [loading, setLoading] = useState(false)
 
     const onHandleInputChange = (field: string, value: string) => {
-        setAssistant((prev: any) => ({
-            ...prev,
-            [field]: value
-        }))
+        setAssistant((prev) => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                [field]: value
+            } as AssistantType;
+        })
     }
 
     const onSave = async () => {
-        if (!assistant) return
+        if (!assistant || !assistant._id) return
         setLoading(true)
         try {
             await UpdateAssistant({
                 id: assistant._id,
-                aiModelId: assistant.aiModelId,
+                aiModelId: assistant.aiModelId || 'gemini-1.5-flash',
                 userInstruction: assistant.userInstruction,
             })
             toast('Saved successfully!')
-        } catch (error) {
+        } catch {
             toast.error('Error saving assistant.')
         }
         setLoading(false)
     }
 
     const onDelete = async () => {
-        if (!assistant) return
+        if (!assistant || !assistant._id) return
         setLoading(true)
         try {
             await DeleteAssistant({
@@ -170,7 +174,7 @@ function AssistantSettings() {
             })
             setAssistant(null)
             toast.success('Assistant deleted.')
-        } catch (error) {
+        } catch {
             toast.error('Error deleting assistant.')
         }
         setLoading(false)

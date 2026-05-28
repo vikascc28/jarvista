@@ -7,8 +7,13 @@ import {
 import AiAssistantsList from '@/services/AiAssistantsList'
 import Image from 'next/image'
 
-
-function AssistantAvatar({children, selectedImage}:any) {
+function AssistantAvatar({
+  children,
+  selectedImage,
+}: {
+  children: React.ReactNode;
+  selectedImage: (value: string) => void;
+}) {
   return (
     <Popover>
   <PopoverTrigger>{children}</PopoverTrigger>
