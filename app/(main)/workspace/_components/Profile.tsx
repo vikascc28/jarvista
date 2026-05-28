@@ -1,12 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -18,6 +16,33 @@ import { api } from "@/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import { PLAN_LIMITS } from "@/lib/constants";
+
+declare global {
+    interface Window {
+        Razorpay: new (options: RazorpayCheckoutOptions) => { open: () => void };
+    }
+}
+
+type RazorpayCheckoutResponse = {
+    razorpay_payment_id?: string;
+    razorpay_subscription_id?: string;
+    razorpay_signature?: string;
+};
+
+type RazorpayCheckoutOptions = {
+    key: string | undefined;
+    subscription_id: string;
+    name: string;
+    description: string;
+    image: string;
+    handler: (resp: RazorpayCheckoutResponse) => Promise<void>;
+    prefill: {
+        name?: string;
+        email?: string;
+    };
+    notes: Record<string, string>;
+    theme: { color: string };
+};
 
 function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDialog: (open: boolean) => void }) {
     const { user } = useContext(AuthContext);
@@ -55,13 +80,18 @@ function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDi
     }
 
     const MakePayment = (subscriptionId: string) => {
-        let options = {
+        if (!user?._id) {
+            toast.error("User session is missing.");
+            return;
+        }
+
+        const options: RazorpayCheckoutOptions = {
             key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
             subscription_id: subscriptionId,
             name: "Jarvista AI Assistant",
             description: "Pro Subscription Plan",
             image: '/logo.svg',
-            handler: async function (resp: any) {
+            handler: async function (resp: RazorpayCheckoutResponse) {
                 if (resp?.razorpay_payment_id) {
                     const verification = await axios.post('/api/verify-subscription', resp);
                     if (!verification?.data?.verified) {
@@ -70,17 +100,16 @@ function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDi
                     }
 
                     await updateUserOrder({
-                        uid: user?._id!,
+                        uid: user._id,
                         orderId: resp.razorpay_subscription_id,
                         credits: PLAN_LIMITS.proCredits,
                     });
                     toast('Thank You! Credits Added')
                 }
             },
-            'prefill': {
+            prefill: {
                 name: user?.name,
                 email: user?.email,
-                contact: user?.phone,
             },
             notes: {
 
@@ -90,18 +119,21 @@ function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDi
             }
         };
 
-        //@ts-ignore
         const rzp = new window.Razorpay(options);
         rzp.open();
     }
 
     const cancelSubscription = async () => {
+        if (!user?._id) {
+            toast.error("User session is missing.");
+            return;
+        }
         try {
             await axios.post('/api/cancel-subscription', {
                 subId: user?.orderId
             });
             await updateUserOrder({
-                uid: user?._id!,
+                uid: user._id,
                 credits: PLAN_LIMITS.freeCredits,
                 orderId: undefined,
             });
@@ -121,7 +153,7 @@ function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDi
                     <DialogDescription>
                         <div>
                             <div className="flex gap-4 items-center">
-                                <Image src={user?.picture} alt='user' width={150} height={150}
+                                <Image src={user?.picture || '/default-avatar.avif'} alt='user' width={150} height={150}
                                     className='w-[60px] h-[60px] rounded-full'
                                 />
                                 <div className='gap-4 items-center'>
@@ -132,8 +164,8 @@ function Profile({ openDialog, setOpenDialog }: { openDialog: boolean; setOpenDi
                             <hr className="my-3"></hr>
                             <div className="flex flex-col gap-2">
                                 <h2 className="font-bold">Token Usage</h2>
-                                <h2>{user?.credits}/{maxToken}</h2>
-                                <Progress value={(user?.credits / maxToken) * 100} />
+                                <h2>{user?.credits ?? 0}/{maxToken}</h2>
+                                <Progress value={(((user?.credits ?? 0) / maxToken) * 100) || 0} />
                                 <h2 className="flex justify-between font-bold mt-3 text-lg">Current Plan
                                     <span className="p-1 bg-gray-100 rounded-md px-2 font-normal">{!user?.orderId ? 'Free Plan' : 'Pro Plan'}</span></h2>
                             </div>

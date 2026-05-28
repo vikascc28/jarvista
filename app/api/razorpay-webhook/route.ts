@@ -2,6 +2,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { createHmac } from "node:crypto";
+import { Id } from "@/convex/_generated/dataModel";
 
 function verifyWebhookSignature(payload: string, signature: string, secret: string) {
   const expected = createHmac("sha256", secret).update(payload).digest("hex");
@@ -30,9 +31,9 @@ export async function POST(req: Request) {
     if (convexUrl) {
       const client = new ConvexHttpClient(convexUrl);
       await client.mutation(api.users.applyProPlanFromWebhook, {
-        uid: notes.uid,
+        uid: notes.uid as Id<"users">,
         orderId: subscriptionId,
-      } as any);
+      });
     }
   }
 

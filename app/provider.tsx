@@ -1,7 +1,6 @@
 'use client';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-
 import React, { useMemo, useState } from 'react'
 import { AuthContext, AuthUser } from '@/context/AuthContext';
 
@@ -15,7 +14,9 @@ function Provider(
       }>
 ) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || 'http://127.0.0.1:3210';
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+  const convex = useMemo(() => new ConvexReactClient(convexUrl), [convexUrl]);
 
   const logout = async () => {
     await fetch('/api/auth/session', { method: 'DELETE' });
@@ -27,17 +28,15 @@ function Provider(
     [user],
   );
 
+  const appContent = (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
+
   return (
     <div>
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
-          <ConvexProvider client={convex}>
-            <AuthContext.Provider value={contextValue}>
-              {children}
-            </AuthContext.Provider>
-            
-          </ConvexProvider>
-        </GoogleOAuthProvider>
-   
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <ConvexProvider client={convex}>{appContent}</ConvexProvider>
+      </GoogleOAuthProvider>
     </div>
   )
 }

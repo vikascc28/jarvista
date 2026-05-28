@@ -10,6 +10,7 @@ import { AuthContext } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 function SignIn() {
   const CreateUser = useMutation(api.users.CreateUser);
@@ -66,9 +67,10 @@ function SignIn() {
 
       {/* Background logo (faded and blurred) */}
       <div className="absolute inset-0 z-0">
-        <img
+        <Image
           src="/projectLogo.jpeg"
           alt="Background Logo"
+          fill
           className="w-full h-full object-cover opacity-5 blur-sm pointer-events-none select-none"
         />
       </div>

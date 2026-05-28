@@ -20,6 +20,7 @@ function Provider({
     const[assistant,setAssistant]=useState<AssistantType | null>(null);
     useEffect(()=>{
       void CheckUserAuth();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
     const CheckUserAuth =async ()=>{
       const oauthUser = await GetSessionUserData();

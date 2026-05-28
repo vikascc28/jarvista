@@ -150,23 +150,23 @@ function AssistantSettings() {
     }
 
     const onSave = async () => {
-        if (!assistant) return
+        if (!assistant || !assistant._id) return
         setLoading(true)
         try {
             await UpdateAssistant({
                 id: assistant._id,
-                aiModelId: assistant.aiModelId,
+                aiModelId: assistant.aiModelId || 'gemini-1.5-flash',
                 userInstruction: assistant.userInstruction,
             })
             toast('Saved successfully!')
-        } catch (error) {
+        } catch {
             toast.error('Error saving assistant.')
         }
         setLoading(false)
     }
 
     const onDelete = async () => {
-        if (!assistant) return
+        if (!assistant || !assistant._id) return
         setLoading(true)
         try {
             await DeleteAssistant({
@@ -174,7 +174,7 @@ function AssistantSettings() {
             })
             setAssistant(null)
             toast.success('Assistant deleted.')
-        } catch (error) {
+        } catch {
             toast.error('Error deleting assistant.')
         }
         setLoading(false)

@@ -1,7 +1,8 @@
 import { createContext } from "react";
+import { Id } from "@/convex/_generated/dataModel";
 
 export type AssistantType = {
-  _id?: string;
+  _id?: Id<"userAiAssistants">;
   id: number;
   name: string;
   title: string;

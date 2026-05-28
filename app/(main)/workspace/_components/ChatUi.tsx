@@ -83,7 +83,7 @@ function ChatUi() {
     }
 
     setMessages([]);
-  }, [assistant?.id, history]);
+  }, [assistant?.id, assistant?.aiModelId, history]);
 
   const selectedSuggestions = useMemo(
     () => (smartSuggestions && smartSuggestions.length > 0 ? smartSuggestions : assistant?.sampleQuestions || []),

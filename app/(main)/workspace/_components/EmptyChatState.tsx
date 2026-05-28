@@ -16,7 +16,7 @@ function EmptyChatState({
 
     return (
         <div className='flex flex-col items-center'>
-            <SparklesText className='text-4xl text-center'>"How Can I Assist You?"</SparklesText>
+            <SparklesText className='text-4xl text-center'>&quot;How Can I Assist You?&quot;</SparklesText>
             <div className='mt-7'>
                 {items.map((suggestion: string, index: number) => (
                     <BlurFade delay={0.25} key={suggestion}>

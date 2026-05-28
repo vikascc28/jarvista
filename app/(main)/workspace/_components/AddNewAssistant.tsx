@@ -52,7 +52,7 @@ function AddNewAssistant({ children }: { children: React.ReactNode }) {
 
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
-  const { assistant, setAssistant } = useContext(AssistantContext);
+  const { setAssistant } = useContext(AssistantContext);
   const onHandleInputChange = (field: keyof AssistantType, value: string) => {
     setSelectedAssistant((prev) => ({
       ...prev,
@@ -61,6 +61,10 @@ function AddNewAssistant({ children }: { children: React.ReactNode }) {
   };
 
   const onSave = async () => {
+    if (!user?._id) {
+      toast("Please sign in again.");
+      return;
+    }
     if (
       !selectedAssistant?.name ||
       !selectedAssistant?.title ||
@@ -70,9 +74,9 @@ function AddNewAssistant({ children }: { children: React.ReactNode }) {
       return;
     }
     setLoading(true);
-    const result = await AddAssistant({
+    await AddAssistant({
       records: [selectedAssistant],
-      uid: user?._id,
+      uid: user._id,
     });
     toast("New Assistant Added.");
     setAssistant(null);
@@ -101,7 +105,7 @@ function AddNewAssistant({ children }: { children: React.ReactNode }) {
                     <div
                       className=" p-1 hover:bg-secondary flex gap-2 items-center rounded-xl cursor-pointer"
                       key={index}
-                      onClick={() => setSelectedAssistant({ ...assistant, aiModelId: assistant.aiModelId ?? "gemini-1.5-flash" })}
+                      onClick={() => setSelectedAssistant({ ...assistant, aiModelId: "gemini-1.5-flash" })}
                     >
                       <Image
                         src={assistant.image}
