@@ -51,6 +51,7 @@ To set up JarVista locally, you would typically follow these steps:
     NEXT_PUBLIC_GOOGLE_CLIENT_ID=
     GOOGLE_API_KEY=
     OPENAI_API_KEY=
+    ANTHROPIC_API_KEY=
     RAZORPAY_LIVE_KEY=
     RAZORPAY_SECRET_KEY=
     NEXT_PUBLIC_RAZORPAY_KEY_ID=
