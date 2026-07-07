@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { AI_GUARDRAILS } from '@/lib/constants';
 
 type ChatBody = {
@@ -46,6 +47,28 @@ async function runWithTimeout<T>(promise: Promise<T>) {
 
 async function getModelResponse(body: ChatBody, prompt: string) {
   const aiModelId = body.aiModelId || FALLBACK_MODEL;
+
+  if (aiModelId.startsWith('claude') && process.env.ANTHROPIC_API_KEY) {
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const message = await runWithTimeout(
+      anthropic.messages.create({
+        model: aiModelId,
+        max_tokens: 4096,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    );
+
+    const content = message.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map((block) => block.text)
+      .join('');
+
+    return {
+      content: content || 'No response generated.',
+      model: aiModelId,
+      isFallback: false,
+    };
+  }
 
   if ((aiModelId === 'gpt-4o-mini' || aiModelId === 'gpt-3.5-turbo') && process.env.OPENAI_API_KEY) {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
